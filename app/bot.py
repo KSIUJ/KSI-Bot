@@ -1,19 +1,12 @@
 import discord
-import logging
 import os
 
 from dotenv import load_dotenv
 from discord.ext.commands import Bot as BotBase
 
-logger = logging.getLogger("discord")
-logger.setLevel(logging.DEBUG)
-handler = logging.FileHandler(
-    filename="logs/discord.log", encoding="utf-8", mode="w"
-)
-handler.setFormatter(
-    logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s")
-)
-logger.addHandler(handler)
+from app.logger import get_logger
+
+LOGGER = get_logger()
 
 
 class Bot(BotBase):
