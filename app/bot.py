@@ -1,18 +1,23 @@
+from __future__ import annotations
+
 import discord
 import os
 
-from dotenv import load_dotenv
+
 from discord.ext.commands import Bot as BotBase
 
 from app.logger import get_logger
-
-LOGGER = get_logger()
+from app.database.db import DatabaseHandler
+from dotenv import load_dotenv
+from logging import Logger
 
 
 class Bot(BotBase):
-    instance = None
+    instance: Bot | None = None
+    database_handler: DatabaseHandler
+    logger: Logger
 
-    def __new__(cls):
+    def __new__(cls) -> Bot:
         if cls.instance is None:
             cls.instance = super().__new__(cls)
         return cls.instance
@@ -21,34 +26,53 @@ class Bot(BotBase):
         self.ready = False
         super().__init__(intents=discord.Intents.all())
 
-    def run(self) -> None:
-        load_dotenv()
+    def _set_token(self) -> None:
+        """Get current token from DISCORD_TOKEN enviromental variable and sets token variable"""
 
         self.TOKEN = os.getenv("DISCORD_TOKEN")
 
-        if self.TOKEN is None:
-            print(
-                "Token is not initialized. \
-                Be sure to set environmental variable DISCORD_TOKEN",
-                flush=True,
-            )
-            exit(1)
+    def _set_logger(self) -> None:
+        """Gets logging file path from LOGS_PATH enviromental variable and sets logger variable"""
 
-        try:
-            super().run(self.TOKEN, reconnect=True)
-            print("Bot is active.", flush=True)
-        except BaseException as e:
-            print(
-                f"Unexpected exception while initializing bot: {type(e)}-{e}",
-                flush=True,
+        self.LOGGING_PATH = os.getenv("LOGS_PATH")
+
+        if self.LOGGING_PATH is None:
+            raise Exception("Enviromental variable for logging path doesn't have value")
+
+        self.logger = get_logger(self.LOGGING_PATH)
+
+    def _set_database(self) -> None:
+        """Gets database and schema file paths enviromental variables and sets the db variable"""
+
+        self.DB_PATH = os.getenv("DATABASE_PATH")
+        self.SCHEMA_PATH = os.getenv("SCHEMA_PATH")
+
+        if self.DB_PATH is None:
+            raise Exception("Enviromental variable for database path doesn't have value")
+
+        if self.SCHEMA_PATH is None:
+            raise Exception(
+                "Enviromental variable for database schema file path doesn't have value"
             )
-            exit(2)
+
+        self.database_handler = DatabaseHandler(self.DB_PATH, self.SCHEMA_PATH)
+
+    def run(self) -> None:
+        """Loads enviromental variables, sets token, logger and db handler and starts the bot"""
+
+        load_dotenv()
+        self._set_token()
+        self._set_logger()
+        self._set_database()
+
+        self.database_handler.build()
+        super().run(self.TOKEN, reconnect=True)
 
     async def on_connect(self) -> None:
-        print("OKBot has connected.", flush=True)
+        self.logger.info("OKBot has connected")
 
     async def on_disconnect(self) -> None:
-        print("OKBot has disconnected.", flush=True)
+        self.logger.info("OKBot has disconnected")
 
     async def on_ready(self) -> None:
         pass
