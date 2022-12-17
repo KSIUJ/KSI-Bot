@@ -24,12 +24,37 @@ class Bot(BotBase):
 
     def __init__(self) -> None:
         self.ready = False
-        super().__init__(intents=discord.Intents.all())
+
+        load_dotenv()
+        self._set_app_id()
+        self._set_command_prefix()
+
+        super().__init__(
+            command_prefix=self.COMMAND_PREFIX,  # type: ignore
+            intents=discord.Intents.all(),
+            application_id=self.APP_ID,
+        )
+
+    def _set_command_prefix(self) -> None:
+        """Get command prefix from COMMAND_PREFIX enviromental variable and sets command prefix variable"""
+
+        self.COMMAND_PREFIX = os.getenv("COMMAND_PREFIX")
+        if self.COMMAND_PREFIX is None:
+            raise Exception("Enviromental variable COMMAND_PREFIX doesn't have value")
+
+    def _set_app_id(self) -> None:
+        """Get application ID from APP_ID enviromental variable and sets APP_ID variable"""
+
+        self.APP_ID = os.getenv("APP_ID")
+        if self.APP_ID is None:
+            raise Exception("Enviromental variable APP_ID doesn't have value")
 
     def _set_token(self) -> None:
         """Get current token from DISCORD_TOKEN enviromental variable and sets token variable"""
 
         self.TOKEN = os.getenv("DISCORD_TOKEN")
+        if self.TOKEN is None:
+            raise Exception("Enviromental variable DISCORD_TOKEN doesn't have value")
 
     def _set_logger(self) -> None:
         """Gets logging file path from LOGS_PATH enviromental variable and sets logger variable"""
@@ -60,7 +85,6 @@ class Bot(BotBase):
     def run(self) -> None:
         """Loads enviromental variables, sets token, logger and db handler and starts the bot"""
 
-        load_dotenv()
         self._set_token()
         self._set_logger()
         self._set_database()
