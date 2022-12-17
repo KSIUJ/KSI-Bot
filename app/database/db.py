@@ -6,24 +6,28 @@ from typing import Any, List
 
 class DatabaseHandler:
     def __init__(self, db_path: str, build_path: str) -> None:
-        self._db_path = db_path
-        self._build_path = build_path
-        self._connection = sqlite3.connect(db_path)
-        self._cursor = self._connection.cursor()
+        self._db_path: str = db_path
+        self._build_path: str = build_path
+        self._connection: sqlite3.Connection = sqlite3.connect(db_path)
+        self._cursor: sqlite3.Cursor = self._connection.cursor()
 
     def build(self) -> None:
+        """ "Build the database from schema file if it exists"""
+
         if pathlib.Path(self._build_path).exists():
             self.execute_file(self._build_path)
         else:
-            raise FileNotFoundError(
-                f"Database schema file doesn't exist {self._build_path}"
-            )
+            raise FileNotFoundError(f"Database schema file doesn't exist {self._build_path}")
         self.commit()
 
     def commit(self) -> None:
+        """Commit to the database"""
+
         self._connection.commit()
 
     def close(self) -> None:
+        """Close connection to the database"""
+
         self._connection.close()
 
     def field(self, command, *values) -> Any:
@@ -47,7 +51,7 @@ class DatabaseHandler:
 
         return [row[0] for row in self._cursor.fetchall()]
 
-    def execute(self, command, *values):
+    def execute(self, command, *values) -> None:
         self._cursor.execute(command, values)
 
     def execute_file(self, path: str) -> None:
