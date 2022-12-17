@@ -12,15 +12,19 @@ from dotenv import load_dotenv
 from logging import Logger
 
 
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
 class Bot(BotBase):
-    instance: Bot | None = None
+    __metaclass__ = Singleton
     database_handler: DatabaseHandler
     logger: Logger
-
-    def __new__(cls) -> Bot:
-        if cls.instance is None:
-            cls.instance = super().__new__(cls)
-        return cls.instance
 
     def __init__(self) -> None:
         self.ready = False
