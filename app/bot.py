@@ -104,7 +104,7 @@ class Bot(BotBase):
     async def on_error(self, error, *args, **kwargs) -> None:
         pass
 
-    async def on_command_error(self, ctx, exc):
+    async def on_command_error(self, ctx, exc) -> None:
         pass
 
     async def on_message(self, message) -> None:
