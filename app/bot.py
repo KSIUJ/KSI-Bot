@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import discord
 import os
+import pathlib
 
+from typing import List
 
 from discord.ext.commands import Bot as BotBase
+from discord.ext import commands
 
 from app.logger import get_logger
 from app.database.db import DatabaseHandler
@@ -12,17 +15,7 @@ from dotenv import load_dotenv
 from logging import Logger
 
 
-class Singleton(type):
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
-
-
 class Bot(BotBase):
-    __metaclass__ = Singleton
     database_handler: DatabaseHandler
     logger: Logger
 
@@ -34,10 +27,16 @@ class Bot(BotBase):
         self._set_command_prefix()
 
         super().__init__(
-            command_prefix=self.COMMAND_PREFIX,  # type: ignore
+            command_prefix=commands.when_mentioned_or(self.COMMAND_PREFIX),  # type: ignore
             intents=discord.Intents.all(),
             application_id=self.APP_ID,
         )
+
+    def get_list_of_cogs(self, path: str) -> List[str]:
+        cogs = []
+        for file in pathlib.Path(path).glob("*.py"):
+            cogs.append(f"{path.replace('/', '.')}.{file.stem}")
+        return cogs
 
     def _set_command_prefix(self) -> None:
         """Get command prefix from COMMAND_PREFIX enviromental variable and sets command prefix variable"""
@@ -94,6 +93,11 @@ class Bot(BotBase):
         self._set_database()
 
         self.database_handler.build()
+
+        for cog in self.get_list_of_cogs("app/cogs"):
+            self.load_extension(cog)
+            self.logger.info(f"{cog} loaded")
+
         super().run(self.TOKEN, reconnect=True)
 
     async def on_connect(self) -> None:
@@ -103,17 +107,20 @@ class Bot(BotBase):
         self.logger.info("OKBot has disconnected")
 
     async def on_ready(self) -> None:
-        pass
+        if not self.ready:
+            self.ready = True
+            self.logger.info("OKBot is ready")
+        else:
+            self.logger.info("OKBot has reconnected")
 
     async def on_error(self, error, *args, **kwargs) -> None:
-        pass
+        self.logger.error(str(error))
+        raise error
 
     async def on_command_error(self, ctx, exc) -> None:
-        pass
+        self.logger.error(str(exc))
+        await ctx.send(".")
+        raise exc
 
     async def on_message(self, message) -> None:
         pass
-
-
-def get_bot() -> Bot:
-    return Bot()
