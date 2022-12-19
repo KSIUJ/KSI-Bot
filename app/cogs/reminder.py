@@ -3,13 +3,16 @@ import app.bot
 import datetime
 
 from discord.ext import commands
+from discord import app_commands
+
+from typing import Literal
 
 
 class Reminder(commands.Cog):
     def __init__(self, bot: app.bot.Bot) -> None:
         self.bot = bot
 
-    def _get_date(self, value: int, unit: str) -> datetime.datetime:
+    def get_remind_date(self, value: int, unit: str) -> datetime.datetime:
         if unit == "minute":
             return datetime.datetime.now() + datetime.timedelta(minutes=value)
 
@@ -21,45 +24,42 @@ class Reminder(commands.Cog):
 
         return datetime.datetime.now()
 
-    @commands.slash_command(
+    @app_commands.command(
         name="remindme",
         description="set a reminder",
-        guild_ids=[848921520776413213],
     )
-    @commands.cooldown(rate=1, per=60)
-    @discord.option("value", description="enter the value")
-    @discord.option("unit", description="choose the unit", choices=["minute", "hour", "day"])
-    @discord.option(
-        "message",
-        description="message which u want to get with the reminder",
-        min_length=1,
-        max_length=50,
-    )
+    @app_commands.checks.cooldown(1, 60)
+    @app_commands.guilds(discord.Object(id=848921520776413213))
     async def _remindme(
-        self, ctx: discord.ApplicationContext, value: int, unit: str, message: str
+        self,
+        interaction: discord.Interaction,
+        value: int,
+        unit: Literal["minutes", "hours", "days"],
+        message: str,
     ) -> None:
-        await ctx.defer()
+        await interaction.response.defer(ephemeral=True, thinking=True)
 
-        remind_date = self._get_date(value, unit).replace(second=0, microsecond=0)
-        self.bot.database_handler.execute(
+        remind_date = self.get_remind_date(value, unit).replace(second=0, microsecond=0)
+        await self.bot.database_handler.execute_and_commit(
             "INSERT INTO Reminders (UserID, RemindDate, ChannelID, Message) VALUES (?, ?, ?, ?)",
-            ctx.user.id,
+            interaction.user.id,
             str(remind_date),
-            str(ctx.channel_id),
+            str(interaction.channel_id),
             message,
         )
-        self.bot.database_handler.commit()
 
-        await ctx.respond(f"reminder set for {value} {unit}")
+        await interaction.followup.send(f"reminder set for {value} {unit}")
 
-    async def _respond_with_reminder(self, userID: int, channelID: int) -> None:
-        target_user = await self.bot.get_or_fetch_user(userID)
+    async def respond_with_reminder(self, userID: int, channelID: int) -> None:
+        target_user = self.bot.get_user(userID)
+        target_channel = self.bot.get_channel(channelID)
 
         if target_user:
             await target_user.send("You have been reminded!")
-        else:
-            self.bot.logger.error("No target user with given ID found in response to a reminder!")
+
+        if target_channel:
+            await target_channel.send(f"@{userID} you have been reminded!")  # type: ignore
 
 
-def setup(bot: app.bot.Bot) -> None:
-    bot.add_cog(Reminder(bot))
+async def setup(bot: app.bot.Bot) -> None:
+    await bot.add_cog(Reminder(bot))

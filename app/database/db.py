@@ -1,59 +1,72 @@
 import pathlib
-import sqlite3
+import aiosqlite
+import aiofiles
 
-from typing import Any, List
+from typing import Any, Iterable, List
 
 
 class DatabaseHandler:
     def __init__(self, db_path: str, build_path: str) -> None:
-        self._db_path: str = db_path
-        self._build_path: str = build_path
-        self._connection: sqlite3.Connection = sqlite3.connect(db_path)
-        self._cursor: sqlite3.Cursor = self._connection.cursor()
+        self.db_path: str = db_path
+        self.build_path: str = build_path
 
-    def build(self) -> None:
-        """ "Build the database from schema file if it exists"""
+    async def build(self) -> None:
+        """Build the database from schema file if it exists"""
 
-        if pathlib.Path(self._build_path).exists():
-            self.execute_file(self._build_path)
-        else:
-            raise FileNotFoundError(f"Database schema file doesn't exist {self._build_path}")
-        self.commit()
+        async with aiosqlite.connect(self.db_path) as db:
+            if pathlib.Path(self.build_path).exists():
+                await self.execute_file(self.build_path)
+            else:
+                raise FileNotFoundError(f"Database schema file doesn't exist {self.build_path}")
+            await db.commit()
 
-    def commit(self) -> None:
+    async def commit(self) -> None:
         """Commit to the database"""
+        async with aiosqlite.connect(self.db_path) as db:
+            await db.commit()
 
-        self._connection.commit()
+    async def field(self, command, *values) -> Any:
+        async with aiosqlite.connect(self.db_path) as db:
+            cursor = await db.cursor()
+            await cursor.execute(command, values)
 
-    def close(self) -> None:
-        """Close connection to the database"""
+            if (fetch := await cursor.fetchone()) is not None:
+                return fetch[0]
 
-        self._connection.close()
+    async def record(self, command, *values) -> Any | aiosqlite.Row | None:
+        async with aiosqlite.connect(self.db_path) as db:
+            cursor = await db.cursor()
+            await cursor.execute(command, values)
 
-    def field(self, command, *values) -> Any:
-        self._cursor.execute(command, values)
+            return cursor.fetchone()
 
-        if (fetch := self._cursor.fetchone()) is not None:
-            return fetch[0]
+    async def records(self, command, *values) -> Iterable[aiosqlite.Row]:
+        async with aiosqlite.connect(self.db_path) as db:
+            cursor = await db.cursor()
+            await cursor.execute(command, values)
 
-    def record(self, command, *values) -> Any:
-        self._cursor.execute(command, values)
+            return await cursor.fetchall()
 
-        return self._cursor.fetchone()
+    async def column(self, command, *values) -> List[Any | aiosqlite.Row | None]:
+        async with aiosqlite.connect(self.db_path) as db:
+            cursor = await db.cursor()
+            await cursor.execute(command, values)
 
-    def records(self, command, *values) -> List[Any]:
-        self._cursor.execute(command, values)
+            return [row[0] for row in await cursor.fetchall()]
 
-        return self._cursor.fetchall()
+    async def execute(self, command, *values) -> None:
+        async with aiosqlite.connect(self.db_path) as db:
+            cursor = await db.cursor()
+            await cursor.execute(command, values)
 
-    def column(self, command, *values) -> List[Any]:
-        self._cursor.execute(command, values)
+    async def execute_and_commit(self, command, *values) -> None:
+        async with aiosqlite.connect(self.db_path) as db:
+            cursor = await db.cursor()
+            await cursor.execute(command, values)
+            await db.commit()
 
-        return [row[0] for row in self._cursor.fetchall()]
-
-    def execute(self, command, *values) -> None:
-        self._cursor.execute(command, values)
-
-    def execute_file(self, path: str) -> None:
-        with open(path, "r", encoding="UTF-8") as script:
-            self._cursor.executescript(script.read())
+    async def execute_file(self, path: str) -> None:
+        async with aiosqlite.connect(self.db_path) as db:
+            cursor = await db.cursor()
+            async with aiofiles.open(path, mode="r", encoding="UTF-8") as script:
+                await cursor.executescript(await script.read())

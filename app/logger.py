@@ -1,6 +1,7 @@
-import logging
 import pathlib
 import datetime
+import discord
+import logging
 
 
 def create_logs_directory(path: str) -> None:
@@ -8,18 +9,18 @@ def create_logs_directory(path: str) -> None:
         pathlib.Path(path).mkdir()
 
 
-def get_logger(logs_path: str) -> logging.Logger:
-    """Creates logs directory and return a logger object connected to this directory"""
+def setup_logging(logs_path: str):
+    """Creates logs directory and setups logging inside discord library"""
 
     create_logs_directory(logs_path)
-    logger = logging.getLogger("discord")
-    logger.setLevel("DEBUG")
+
     handler = logging.FileHandler(
         filename=f"{logs_path}/{datetime.datetime.now()}.log",
         encoding="utf-8",
-        mode="a+",
+        mode="w",
     )
-    handler.setFormatter(logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s"))
-    logger.addHandler(handler)
-
-    return logger
+    dt_fmt = "%Y-%m-%d %H:%M:%S"
+    formatter = logging.Formatter(
+        "[{asctime}] [{levelname:<8}] {name}: {message}", dt_fmt, style="{"
+    )
+    discord.utils.setup_logging(handler=handler, formatter=formatter, level=logging.DEBUG)
