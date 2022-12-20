@@ -36,15 +36,15 @@ class Bot(commands.Bot):
             await self.load_extension(cog)
 
     async def setup_hook(self) -> None:
-        await setup_logging()
-
         await create_database()
         self.database_handler = DatabaseHandler(
             app.config.get_database_path(), app.config.get_schema_path()
         )
+        await setup_logging()
 
         await self.load_cogs()
         await self.tree.sync(guild=discord.Object(id=848921520776413213))
+        await self.tree.sync(guild=discord.Object(id=528544644678680576))
 
     async def close(self):
         await self.database_handler.commit()

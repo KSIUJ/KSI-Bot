@@ -32,7 +32,9 @@ class Reminder(commands.Cog):
         description="set a reminder",
     )
     @app_commands.checks.cooldown(1, 30)
-    @app_commands.guilds(discord.Object(id=848921520776413213))
+    @app_commands.guilds(
+        discord.Object(id=848921520776413213), discord.Object(id=528544644678680576)
+    )
     async def _remindme(
         self,
         interaction: discord.Interaction,

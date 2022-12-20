@@ -3,10 +3,13 @@ import datetime
 import discord
 import logging
 
-from app.config import get_logging_path
+from app.config import get_logging_path, get_data_path
 
 
 async def create_logs_directory(path: str) -> None:
+    if not pathlib.Path(get_data_path()).exists():
+        pathlib.Path(get_data_path()).mkdir()
+
     if not pathlib.Path(path).exists():
         pathlib.Path(path).mkdir()
 
