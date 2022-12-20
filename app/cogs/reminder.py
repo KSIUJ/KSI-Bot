@@ -1,11 +1,16 @@
 import discord
 import app.bot
 import datetime
+import logging
 
 from discord.ext import commands
 from discord import app_commands
 
 from typing import Literal
+from app.logger import setup_logger
+
+logger = logging.getLogger(__name__)
+setup_logger(logger)
 
 
 class Reminder(commands.Cog):
@@ -59,6 +64,12 @@ class Reminder(commands.Cog):
 
         if target_channel:
             await target_channel.send(f"@{userID} you have been reminded!")  # type: ignore
+
+    async def cog_app_command_error(self, interaction: discord.Interaction, error) -> None:
+        logger.error(type(error), error)
+
+        if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
+            await interaction.response.send_message(str(error))
 
 
 async def setup(bot: app.bot.Bot) -> None:

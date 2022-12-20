@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import discord
 import pathlib
 import app.config
@@ -19,11 +18,6 @@ class Bot(commands.Bot):
     def __init__(self) -> None:
         app_id = app.config.get_app_id()
         command_prefix = app.config.get_command_prefix()
-        setup_logging(app.config.get_logging_path())
-        self.database_handler = DatabaseHandler(
-            app.config.get_database_path(), app.config.get_schema_path()
-        )
-        asyncio.run(self.database_handler.build())
 
         super().__init__(
             command_prefix=commands.when_mentioned_or(command_prefix),  # type: ignore
@@ -42,6 +36,13 @@ class Bot(commands.Bot):
             await self.load_extension(cog)
 
     async def setup_hook(self) -> None:
+        await setup_logging()
+
+        self.database_handler = DatabaseHandler(
+            app.config.get_database_path(), app.config.get_schema_path()
+        )
+        await self.database_handler.build()
+
         await self.load_cogs()
         await self.tree.sync(guild=discord.Object(id=848921520776413213))
 
