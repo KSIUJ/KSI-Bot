@@ -8,7 +8,7 @@ from typing import List
 
 from discord.ext import commands
 
-from app.database.db import DatabaseHandler
+from app.database.db import DatabaseHandler, create_database
 from app.logger import setup_logging
 
 
@@ -38,10 +38,10 @@ class Bot(commands.Bot):
     async def setup_hook(self) -> None:
         await setup_logging()
 
+        await create_database()
         self.database_handler = DatabaseHandler(
             app.config.get_database_path(), app.config.get_schema_path()
         )
-        await self.database_handler.build()
 
         await self.load_cogs()
         await self.tree.sync(guild=discord.Object(id=848921520776413213))

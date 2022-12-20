@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  bot:
+    build: .
+    container_name: okbot
+    volumes:
+      - type: volume
+        source: data
+        target: /data
+
+volumes:
+    data:
+        external: false

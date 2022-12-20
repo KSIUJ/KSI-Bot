@@ -7,10 +7,8 @@ from discord.ext import commands
 from discord import app_commands
 
 from typing import Literal
-from app.logger import setup_logger
 
 logger = logging.getLogger(__name__)
-setup_logger(logger)
 
 
 class Reminder(commands.Cog):
@@ -33,7 +31,7 @@ class Reminder(commands.Cog):
         name="remindme",
         description="set a reminder",
     )
-    @app_commands.checks.cooldown(1, 60)
+    @app_commands.checks.cooldown(1, 30)
     @app_commands.guilds(discord.Object(id=848921520776413213))
     async def _remindme(
         self,

@@ -1,0 +1,11 @@
+.venv
+__pycache__
+.vagrant
+.pytest_cache
+.github
+.cache
+.gitignore
+*.log
+docker
+venv
+docker-compose.yml
