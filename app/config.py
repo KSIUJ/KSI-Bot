@@ -66,3 +66,12 @@ def get_schema_path() -> str:
         raise Exception("Enviromental variable for database schema file path doesn't have value")
 
     return schema_path
+
+
+def get_data_path() -> str:
+    data_path = os.getenv("DATA_PATH")
+
+    if data_path is None:
+        raise Exception("Enviromental variable for data folder path doesn't have value")
+
+    return data_path

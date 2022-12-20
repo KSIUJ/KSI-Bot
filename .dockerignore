@@ -9,3 +9,8 @@ __pycache__
 docker
 venv
 docker-compose.yml
+Dockerfile
+data
+.git
+.env
+.vscode

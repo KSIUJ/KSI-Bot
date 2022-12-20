@@ -3,20 +3,21 @@ import aiosqlite
 import aiofiles
 
 from typing import Any, Iterable, List
-from app.config import get_database_path, get_schema_path
+from app.config import get_data_path, get_schema_path
 
 
 async def create_database() -> None:
-    db_path = get_database_path()
+    data_path = pathlib.Path(get_data_path())
     schema_path = get_schema_path()
 
-    pathlib_db_path = pathlib.Path(db_path)
-    if pathlib_db_path.exists():
-        return
-    else:
-        pathlib.Path(pathlib_db_path.parents[0]).mkdir()
+    if not data_path.exists():
+        pathlib.Path(data_path.parents[0]).mkdir()
 
-    async with aiosqlite.connect(db_path) as db:
+    database_path = data_path / "database.db"
+    if database_path.exists():
+        return
+
+    async with aiosqlite.connect(database_path) as db:
         cursor = await db.cursor()
         async with aiofiles.open(schema_path, mode="r", encoding="UTF-8") as script:
             await cursor.executescript(await script.read())

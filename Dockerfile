@@ -1,6 +1,6 @@
 FROM gorialis/discord.py:minimal
 
-WORKDIR /ok-bot--
+WORKDIR /okbot
 
 COPY . .
 

@@ -6,7 +6,9 @@ services:
     volumes:
       - type: volume
         source: data
-        target: /data
+        target: "/okbot/${DATA_PATH}"
+    env_file:
+      - .env
 
 volumes:
     data:
