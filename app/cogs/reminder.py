@@ -55,15 +55,44 @@ class Reminder(commands.Cog):
 
         await interaction.followup.send(f"reminder set for {value} {unit}")
 
-    async def respond_with_reminder(self, userID: int, channelID: int) -> None:
+    async def check_reminders(
+        self,
+        interaction: discord.Interaction,
+    ) -> None:
+        now = datetime.datetime.now().replace(second=0, microsecond=0)
+
+        records = await self.bot.database_handler.records(
+            "SELECT ROWID, UserID, RemindDate, ChannelID, Message FROM Reminders WHERE RemindDate < ?",
+            str(now),
+        )
+
+        for _, userID, _, channelID, message in records:
+            logger.debug(
+                f"Respond with remainder arguments: userid={userID}, channelid={channelID}, msg={message}"
+            )
+            await self.respond_with_reminder(
+                userID=int(userID), channelID=int(channelID), message=message
+            )
+
+        row_ids = [str(record[0]) for record in records]
+        logger.debug(f"row_ids to delete {','.join(row_ids)}")
+
+        await self.bot.database_handler.execute_and_commit(
+            "DELETE FROM Reminders WHERE ROWID IN (?)", ",".join(row_ids)
+        )
+
+    async def respond_with_reminder(self, userID: int, channelID: int, message: str) -> None:
         target_user = self.bot.get_user(userID)
         target_channel = self.bot.get_channel(channelID)
 
+        logger.debug(
+            f"responding to reminder: target_user={target_user} target_channel={target_channel}"
+        )
         if target_user:
-            await target_user.send("You have been reminded!")
+            await target_user.send(f"You have been reminded with message {message}")
 
         if target_channel:
-            await target_channel.send(f"@{userID} you have been reminded!")  # type: ignore
+            await target_channel.send(f"<@{userID}> reminder! {message}")  # type: ignore
 
     async def cog_app_command_error(self, interaction: discord.Interaction, error) -> None:
         logger.error(type(error), error)
