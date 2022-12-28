@@ -6,6 +6,7 @@ import logging
 from discord.ext import commands
 from discord import app_commands
 
+from apscheduler.triggers.cron import CronTrigger
 from typing import Literal
 
 logger = logging.getLogger(__name__)
@@ -55,10 +56,7 @@ class Reminder(commands.Cog):
 
         await interaction.followup.send(f"reminder set for {value} {unit}")
 
-    async def check_reminders(
-        self,
-        interaction: discord.Interaction,
-    ) -> None:
+    async def check_reminders(self) -> None:
         now = datetime.datetime.now().replace(second=0, microsecond=0)
 
         records = await self.bot.database_handler.records(
@@ -93,6 +91,11 @@ class Reminder(commands.Cog):
 
         if target_channel:
             await target_channel.send(f"<@{userID}> reminder! {message}")  # type: ignore
+
+    @commands.Cog.listener("setup_hook")
+    async def set_scheduler(self) -> None:
+        logger.info("check_reminders added")
+        self.bot.scheduler.add_job(self.check_reminders, CronTrigger(second=0))
 
     async def cog_app_command_error(self, interaction: discord.Interaction, error) -> None:
         logger.error(type(error), error)

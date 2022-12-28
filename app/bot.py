@@ -7,6 +7,7 @@ import app.config
 from typing import List
 
 from discord.ext import commands
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from app.database.db import DatabaseHandler, create_database
 from app.logger import setup_logging
@@ -18,6 +19,7 @@ class Bot(commands.Bot):
     def __init__(self) -> None:
         app_id = app.config.get_app_id()
         command_prefix = app.config.get_command_prefix()
+        self.scheduler = AsyncIOScheduler()
 
         super().__init__(
             command_prefix=commands.when_mentioned_or(command_prefix),  # type: ignore
@@ -45,6 +47,7 @@ class Bot(commands.Bot):
         await self.load_cogs()
         await self.tree.sync(guild=discord.Object(id=848921520776413213))
         await self.tree.sync(guild=discord.Object(id=528544644678680576))
+        self.scheduler.start()
 
     async def close(self):
         await self.database_handler.commit()
