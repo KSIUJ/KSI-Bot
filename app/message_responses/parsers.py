@@ -9,5 +9,5 @@ class MessageParser(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def set_next_responder(self, responder: MessageParser) -> None:
+    def set_next_responder(self, responder: MessageParser) -> MessageParser:
         pass
