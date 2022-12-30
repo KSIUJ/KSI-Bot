@@ -11,6 +11,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from app.database.db import DatabaseHandler, create_database
 from app.logger import setup_logging
+from app.message_responses.responders import handle_responses
 
 
 class Bot(commands.Bot):
@@ -48,6 +49,10 @@ class Bot(commands.Bot):
         await self.tree.sync(guild=discord.Object(id=848921520776413213))
         await self.tree.sync(guild=discord.Object(id=528544644678680576))
         self.scheduler.start()
+
+    async def on_message(self, message: discord.Message) -> None:
+        await handle_responses(message=message)
+        await super().on_message(message)
 
     async def close(self):
         await self.database_handler.commit()
