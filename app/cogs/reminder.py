@@ -9,6 +9,8 @@ from discord import app_commands
 from apscheduler.triggers.cron import CronTrigger
 from typing import Literal
 
+from app.utils.guilds import get_guilds
+
 logger = logging.getLogger(__name__)
 
 
@@ -33,9 +35,7 @@ class Reminder(commands.Cog):
         description="set a reminder",
     )
     @app_commands.checks.cooldown(1, 30)
-    @app_commands.guilds(
-        discord.Object(id=848921520776413213), discord.Object(id=528544644678680576)
-    )
+    @app_commands.guilds(*get_guilds())
     async def _remindme(
         self,
         interaction: discord.Interaction,

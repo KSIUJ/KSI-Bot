@@ -12,6 +12,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from app.database.db import DatabaseHandler, create_database
 from app.logger import setup_logging
 from app.message_responses.responders import handle_responses
+from app.utils.guilds import get_guilds
 
 
 class Bot(commands.Bot):
@@ -38,6 +39,10 @@ class Bot(commands.Bot):
         for cog in await self.get_list_of_cogs("app/cogs"):
             await self.load_extension(cog)
 
+    async def sync_guilds(self) -> None:
+        for guild in get_guilds():
+            await self.tree.sync(guild=guild)
+
     async def setup_hook(self) -> None:
         await create_database()
         self.database_handler = DatabaseHandler(
@@ -46,8 +51,7 @@ class Bot(commands.Bot):
         await setup_logging()
 
         await self.load_cogs()
-        await self.tree.sync(guild=discord.Object(id=848921520776413213))
-        await self.tree.sync(guild=discord.Object(id=528544644678680576))
+        await self.sync_guilds()
         self.scheduler.start()
 
     async def on_message(self, message: discord.Message) -> None:

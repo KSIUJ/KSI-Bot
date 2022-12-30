@@ -6,6 +6,8 @@ import aiohttp
 from discord.ext import commands
 from discord import app_commands
 
+from app.utils.guilds import get_guilds
+
 logger = logging.getLogger(__name__)
 
 
@@ -18,11 +20,9 @@ class Pinger(commands.Cog):
         description="ping a website and check if it does work for the bot",
     )
     @app_commands.checks.cooldown(1, 10)
-    @app_commands.guilds(
-        discord.Object(id=848921520776413213), discord.Object(id=528544644678680576)
-    )
+    @app_commands.guilds(*get_guilds())
     async def _ping(self, interaction: discord.Interaction, url: str) -> None:
-        await interaction.response.defer(ephemeral=True, thinking=True)
+        await interaction.response.defer(ephemeral=False, thinking=True)
 
         if "http" not in url:
             url = f"http://{url}"
