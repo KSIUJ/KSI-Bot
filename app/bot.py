@@ -19,12 +19,12 @@ class Bot(commands.Bot):
     database_handler: DatabaseHandler
 
     def __init__(self) -> None:
-        app_id = app.config.get_app_id()
-        command_prefix = app.config.get_command_prefix()
-        self.scheduler = AsyncIOScheduler()
+        app_id: str = app.config.get_app_id()
+        command_prefix: str = app.config.get_command_prefix()
+        self.scheduler: AsyncIOScheduler = AsyncIOScheduler()
 
         super().__init__(
-            command_prefix=commands.when_mentioned_or(command_prefix),  # type: ignore
+            command_prefix=commands.when_mentioned_or(command_prefix),
             intents=discord.Intents.all(),
             application_id=app_id,
         )
