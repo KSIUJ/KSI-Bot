@@ -14,7 +14,7 @@ async def create_logs_directory(path: str) -> None:
         pathlib.Path(path).mkdir()
 
 
-async def setup_logging():
+async def setup_logging() -> None:
     """Creates logs directory and setups logging inside discord library"""
 
     await create_logs_directory(get_logging_path())
