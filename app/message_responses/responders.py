@@ -8,9 +8,10 @@ from typing import Sequence
 
 logger = logging.getLogger(__name__)
 
+
 class MessageResponder(abc.ABC):
     def __init__(self) -> None:
-        self._next_responder: MessageResponder = None
+        self._next_responder: MessageResponder | None = None
 
     @abc.abstractmethod
     async def get_response(self, message: discord.Message) -> None:
@@ -40,12 +41,11 @@ class PolishBotQuestionResponder(BaseMessageResponder):
         else:
             await super().get_response(message)
 
+
 class WhoAskedPolishResponder(BaseMessageResponder):
     async def get_response(self, message: discord.Message) -> None:
         if "kto pytal" in message.content:
-            await message.channel.send(
-                f"<@{message.author.id}> ja pytalem!"
-            )
+            await message.channel.send(f"<@{message.author.id}> ja pytalem!")
         else:
             await super().get_response(message)
 
