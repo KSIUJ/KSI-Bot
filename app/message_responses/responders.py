@@ -23,6 +23,10 @@ class BaseMessageResponder(MessageResponder):
         self._next_responder = responder
         return responder
 
+    async def get_response(self, message: discord.Message) -> None:
+        if self._next_responder:
+            await self._next_responder.get_response(message)
+
 
 class PolishBotQuestionResponder(BaseMessageResponder):
     async def get_response(self, message: discord.Message) -> None:
@@ -30,6 +34,8 @@ class PolishBotQuestionResponder(BaseMessageResponder):
             await message.channel.send(
                 f"{message.content.removesuffix('bocie?').strip()} {message.author.name}"
             )
+        else:
+            await super().get_response(message)
 
 
 RESPONDERS: Sequence[MessageResponder] = (PolishBotQuestionResponder(),)
