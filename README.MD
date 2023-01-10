@@ -16,8 +16,8 @@ git clone git@github.com:OK-bot-team/uj-discord-bot.git
 Modify .env file and paste your Discord API token and application ID which can be found in the [Discord developer portal](https://discord.com/developers/applications)
 Your token and application ID should be in the .env file in format seen below:
 ```
-DISCORD_TOKEN=<your token should be here>
-APP_ID=<your app id should be here>
+DISCORD_TOKEN=EXAMPLETOKEN404F83FDSS
+APP_ID=1111111101111101
 ```
 
 ## Python app route
