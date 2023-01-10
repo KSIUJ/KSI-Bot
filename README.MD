@@ -21,6 +21,8 @@ APP_ID=1111111101111101
 ```
 
 ## Python app route
+You need to have Python 3.10+ installed
+
 Install depedendencies 
 ```
 pip install -r requirements.txt
