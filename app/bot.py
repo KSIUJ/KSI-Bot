@@ -53,6 +53,7 @@ class Bot(commands.Bot):
         await self.load_cogs()
         await self.sync_guilds()
         self.scheduler.start()
+        await super().setup_hook()
 
     async def on_message(self, message: discord.Message) -> None:
         await handle_responses(message=message)

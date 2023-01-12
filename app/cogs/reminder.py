@@ -63,7 +63,7 @@ class Reminder(commands.Cog):
             "SELECT ROWID, UserID, RemindDate, ChannelID, Message FROM Reminders WHERE RemindDate < ?",
             str(now),
         )
-
+        logger.debug(repr(records))
         for _, userID, _, channelID, message in records:
             logger.debug(
                 f"Respond with remainder arguments: userid={userID}, channelid={channelID}, msg={message}"
@@ -92,7 +92,7 @@ class Reminder(commands.Cog):
         if target_channel:
             await target_channel.send(f"<@{userID}> reminder! {message}")  # type: ignore
 
-    @commands.Cog.listener("setup_hook")
+    @commands.Cog.listener("on_ready")
     async def set_scheduler(self) -> None:
         logger.info("check_reminders added")
         self.bot.scheduler.add_job(self.check_reminders, CronTrigger(second=0))
