@@ -25,13 +25,31 @@ class ImageMaker(commands.Cog):
     @app_commands.guilds(*get_guilds())
     async def _make_image(self, interaction: discord.Interaction, text: str, url: str) -> None:
         await interaction.response.defer(ephemeral=False, thinking=True)
-        background = requests.get(url, stream=True).content
-        image = ResponseImageBuilder(text=text, image=background).build()
-        with BytesIO() as file:
-            image.save(file, format="PNG")
-            file.seek(0)
-            discord_file = discord.File(file, filename="image.png")
-            await interaction.followup.send(file=discord_file)
+
+        with requests.get(url, stream=True) as request:
+            if "content-type" in request.headers and request.headers["content-type"] not in (
+                "image/png",
+                "image/jpeg",
+                "image/jpg",
+            ):
+                await interaction.followup.send(
+                    "Link doesn't contain an image with supported type (png, jpg)!"
+                )
+                return
+
+            if (
+                "content-length" in request.headers
+                and int(request.headers["content-length"]) > 20 * 10**6
+            ):
+                await interaction.followup.send("The image is too big!")
+                return
+
+            image = ResponseImageBuilder(text=text, image=request.content).build()
+            with BytesIO() as file:
+                image.save(file, format="PNG")
+                file.seek(0)
+                discord_file = discord.File(file, filename="image.png")
+                await interaction.followup.send(file=discord_file)
 
     async def cog_app_command_error(self, interaction: discord.Interaction, error) -> None:
         logger.error(type(error), error)
