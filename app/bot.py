@@ -16,8 +16,6 @@ from app.utils.guilds import get_guilds
 
 
 class Bot(commands.Bot):
-    database_handler: DatabaseHandler
-
     def __init__(self) -> None:
         app_id: str = app.config.get_app_id()
         command_prefix: str = app.config.get_command_prefix()
