@@ -12,6 +12,8 @@ from app.utils.guilds import get_guilds
 
 logger = logging.getLogger(__name__)
 
+MAXIMUM_FILESIZE = 20 * (10**6)  # 20 MB
+
 
 class ImageMaker(commands.Cog):
     def __init__(self, bot: app.bot.Bot) -> None:
@@ -39,12 +41,21 @@ class ImageMaker(commands.Cog):
 
             if (
                 "content-length" in request.headers
-                and int(request.headers["content-length"]) > 20 * 10**6
+                and int(request.headers["content-length"]) > MAXIMUM_FILESIZE
             ):
-                await interaction.followup.send("The image is too big!")
+                await interaction.followup.send("The response is too large!")
                 return
 
-            image = ResponseImageBuilder(text=text, image=request.content).build()
+            response_bytes = BytesIO()
+            size = 0
+            for chunk in request.iter_content(1024):
+                size += len(chunk)
+                if size > MAXIMUM_FILESIZE:
+                    await interaction.followup.send("The response is too large!")
+                    return
+                response_bytes.write(chunk)
+
+            image = ResponseImageBuilder(text=text, image=response_bytes.getvalue()).build()
             with BytesIO() as file:
                 image.save(file, format="PNG")
                 file.seek(0)
