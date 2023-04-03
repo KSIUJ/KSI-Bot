@@ -44,7 +44,7 @@ class PolishBotQuestionResponder(BaseMessageResponder):
 
 class WhoAskedPolishResponder(BaseMessageResponder):
     async def get_response(self, message: discord.Message) -> None:
-        if "kto pytal" in message.content:
+        if "kto pytal" in message.content or "kto pytał" in message.content:
             await message.channel.send(f"<@{message.author.id}> ja pytalem!")
         else:
             await super().get_response(message)

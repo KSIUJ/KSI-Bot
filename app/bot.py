@@ -16,8 +16,6 @@ from app.utils.guilds import get_guilds
 
 
 class Bot(commands.Bot):
-    database_handler: DatabaseHandler
-
     def __init__(self) -> None:
         app_id: str = app.config.get_app_id()
         command_prefix: str = app.config.get_command_prefix()
@@ -53,6 +51,7 @@ class Bot(commands.Bot):
         await self.load_cogs()
         await self.sync_guilds()
         self.scheduler.start()
+        await super().setup_hook()
 
     async def on_message(self, message: discord.Message) -> None:
         await handle_responses(message=message)

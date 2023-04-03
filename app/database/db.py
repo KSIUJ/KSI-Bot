@@ -11,7 +11,7 @@ async def create_database() -> None:
     schema_path = get_schema_path()
 
     if not data_path.exists():
-        pathlib.Path(data_path.parents[0]).mkdir()
+        pathlib.Path(data_path).mkdir()
 
     database_path = data_path / "database.db"
     if database_path.exists():
