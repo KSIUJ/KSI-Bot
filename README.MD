@@ -6,11 +6,11 @@ A bot written for the Computer Science server on Jagiellonian University, but co
 
 Clone the repository to your machine
 ```sh
-git clone https://github.com/OK-bot-team/uj-discord-bot.git
+git clone git@github.com:janumiko/OK-BOT.git
 ```
 or using ssh
 ```sh
-git clone git@github.com:OK-bot-team/uj-discord-bot.git
+git clone git@github.com:janumiko/OK-BOT.git
 ```
 
 Modify .env file and paste your Discord API token and application ID which can be found in the [Discord developer portal](https://discord.com/developers/applications)
