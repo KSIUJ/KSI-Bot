@@ -39,7 +39,7 @@ class WhoAskedPolishResponder(BaseMessageResponder):
             await super().get_response(message)
 
 
-RESPONDERS: Sequence[MessageResponder] = (PolishBotQuestionResponder(), WhoAskedPolishResponder())
+RESPONDERS: Sequence[BaseMessageResponder] = (PolishBotQuestionResponder(), WhoAskedPolishResponder())
 
 
 async def handle_responses(message: discord.Message) -> None:
