@@ -22,6 +22,14 @@ class Pinger(commands.Cog):
     @app_commands.checks.cooldown(1, 10)
     @app_commands.guilds(*get_guilds())
     async def _ping(self, interaction: discord.Interaction, url: str) -> None:
+        """Handles the /ping command.
+        The commands pings a website and checks if it does work for the bot.
+
+        Args:
+            interaction (discord.Interaction): The interaction object.
+            url (str): The url to ping.
+        """
+
         await interaction.response.defer(ephemeral=False, thinking=True)
 
         if "http" not in url:
@@ -33,7 +41,16 @@ class Pinger(commands.Cog):
 
         await interaction.followup.send(f"Provided URL returned status {status}")
 
-    async def cog_app_command_error(self, interaction: discord.Interaction, error) -> None:
+    async def cog_app_command_error(
+        self, interaction: discord.Interaction, error: Exception
+    ) -> None:
+        """Handles errors from the /ping command.
+
+        Args:
+            interaction (discord.Interaction): The interaction that triggered the error.
+            error (Exception): The error that was triggered.
+        """
+
         logger.error(type(error), error)
 
         if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
@@ -48,4 +65,10 @@ class Pinger(commands.Cog):
 
 
 async def setup(bot: app.bot.Bot) -> None:
+    """Add the Reminder cog to the bot.
+
+    Args:
+        bot (app.bot.Bot): the bot instance to which the cog should be added.
+    """
+
     await bot.add_cog(Pinger(bot))

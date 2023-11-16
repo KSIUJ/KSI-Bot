@@ -50,7 +50,7 @@ class Bot(commands.Bot):
 
     async def setup_hook(self) -> None:
         """Perform asynchronous setup after the bot is logged in."""
-        await setup_logging()
+        await setup_logging(level=app.config.get_logging_level())
 
         create_database_directory(database_path=app.config.get_database_path())
         self.database_handler = DatabaseHandler(database_path=app.config.get_database_path())

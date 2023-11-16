@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import abc
 import discord
 import logging
 
@@ -9,21 +8,11 @@ from typing import Sequence
 logger = logging.getLogger(__name__)
 
 
-class MessageResponder(abc.ABC):
+class BaseMessageResponder():
     def __init__(self) -> None:
-        self._next_responder: MessageResponder | None = None
+        self._next_responder: BaseMessageResponder | None = None
 
-    @abc.abstractmethod
-    async def get_response(self, message: discord.Message) -> None:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    async def set_next_responder(self, responder: MessageResponder) -> MessageResponder:
-        raise NotImplementedError
-
-
-class BaseMessageResponder(MessageResponder):
-    async def set_next_responder(self, responder: MessageResponder) -> MessageResponder:
+    async def set_next_responder(self, responder: BaseMessageResponder) -> BaseMessageResponder:
         self._next_responder = responder
         return responder
 
@@ -54,6 +43,12 @@ RESPONDERS: Sequence[MessageResponder] = (PolishBotQuestionResponder(), WhoAsked
 
 
 async def handle_responses(message: discord.Message) -> None:
+    """Handle responses to messages.
+    
+    Args:
+        message (discord.Message): The message to handle.
+    """
+
     first_responder = RESPONDERS[0]
 
     current_responder = first_responder

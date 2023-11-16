@@ -14,13 +14,27 @@ async def create_logs_directory(path: str) -> None:
         pathlib.Path(path).mkdir()
 
 
-async def setup_logging() -> None:
-    """Creates logs directory and setups logging inside discord library"""
+async def setup_logging(level: str) -> None:
+    """Creates logs directory and setups logging inside discord library
+    
+    Args:
+        level (str): logging level
+    """
+
+    level_mapping = {
+        "DEBUG": logging.DEBUG,
+        "INFO": logging.INFO,
+        "WARNING": logging.WARNING,
+        "ERROR": logging.ERROR,
+        "CRITICAL": logging.CRITICAL   
+    }
+    
+    logging_level = level_mapping[level]
 
     await create_logs_directory(get_logging_path())
     handler = get_handler()
     formatter = get_formatter()
-    discord.utils.setup_logging(handler=handler, formatter=formatter, level=logging.DEBUG)
+    discord.utils.setup_logging(handler=handler, formatter=formatter, level=logging_level)
 
 
 def get_formatter() -> logging.Formatter:
