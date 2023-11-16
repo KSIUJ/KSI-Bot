@@ -61,7 +61,7 @@ class Pinger(commands.Cog):
             discord.app_commands.errors.CommandInvokeError,
         ):
             logger.error(str(error))
-            await interaction.followup.send(str(error.original))
+            await interaction.followup.send(str(error.original), ephemeral=True)
 
 
 async def setup(bot: app.bot.Bot) -> None:

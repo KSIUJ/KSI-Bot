@@ -10,7 +10,10 @@ from sqlalchemy.ext.asyncio import (
 
 # imports needed for sqlalchemy to create the tables
 from app.database.models.base import Base
-from app.database.models.reminder import (
+from app.database.models.group_reminders import (
+    GroupReminders,  # noqa: F401
+)
+from app.database.models.reminders import (
     Reminders,  # noqa: F401
 )
 

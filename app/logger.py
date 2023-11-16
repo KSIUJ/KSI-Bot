@@ -67,7 +67,7 @@ def get_handler() -> logging.Handler:
 
     logs_path = get_logging_path()
     handler = logging.FileHandler(
-        filename=f"{logs_path}/{datetime.datetime.now()}.log",
+        filename=f"{logs_path}/{datetime.datetime.utcnow()}.log",
         encoding="utf-8",
         mode="w",
     )

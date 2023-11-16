@@ -7,9 +7,9 @@ class Reminders(Base):
     __tablename__ = "Reminders"
 
     ReminderID = Column(Integer, primary_key=True, autoincrement=True)
-    AuthorID = Column(String)
+    AuthorID = Column(Integer)
     RemindDate = Column(String)
     CreationDate = Column(String)
-    ChannelID = Column(String)
+    ChannelID = Column(Integer)
     Message = Column(String)
     SendDirectMessage = Column(Boolean, default=False)
