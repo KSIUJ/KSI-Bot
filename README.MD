@@ -6,11 +6,7 @@ A bot written for the Computer Science server on Jagiellonian University, but co
 
 Clone the repository to your machine
 ```sh
-git clone git@github.com:janumiko/OK-BOT.git
-```
-or using ssh
-```sh
-git clone git@github.com:janumiko/OK-BOT.git
+git clone git@github.com:KSIUJ/KSI-Bot.git
 ```
 
 Modify .env file and paste your Discord API token and application ID which can be found in the [Discord developer portal](https://discord.com/developers/applications)
@@ -21,7 +17,7 @@ APP_ID=1111111101111101
 ```
 
 ## Python app route
-You need to have Python 3.10+ installed
+You need to have Python 3.11+ installed
 
 Install depedendencies 
 ```
