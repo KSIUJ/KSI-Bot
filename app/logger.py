@@ -8,6 +8,12 @@ from app.config import get_data_path, get_logging_path
 
 
 async def create_logs_directory(path: str) -> None:
+    """Creates logs directory if it doesn't exist
+
+    Args:
+        path (str): path to the logs directory
+    """
+
     if not pathlib.Path(get_data_path()).exists():
         pathlib.Path(get_data_path()).mkdir()
 
@@ -39,6 +45,12 @@ async def setup_logging(level: str) -> None:
 
 
 def get_formatter() -> logging.Formatter:
+    """Returns logging formatter which formats the output of logging information
+
+    Returns:
+        logging.Formatter: a logging formatter object.
+    """
+
     date_format = "%Y-%m-%d %H:%M:%S"
     formatter = logging.Formatter(
         "[{asctime}] [{levelname:<8}] {name}: {message}", date_format, style="{"
@@ -47,6 +59,12 @@ def get_formatter() -> logging.Formatter:
 
 
 def get_handler() -> logging.Handler:
+    """Returns logging handler which manages the output of logging information
+
+    Returns:
+        logging.Handler: a logging handler object.
+    """
+
     logs_path = get_logging_path()
     handler = logging.FileHandler(
         filename=f"{logs_path}/{datetime.datetime.now()}.log",

@@ -14,6 +14,8 @@ from app.message_responses.responders import handle_responses
 
 
 class Bot(commands.Bot):
+    """Bot wrapper around the discord Bot class."""
+
     def __init__(self) -> None:
         app_id: str = app.config.get_app_id()
         command_prefix: str = app.config.get_command_prefix()

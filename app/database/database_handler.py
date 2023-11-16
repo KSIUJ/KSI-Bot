@@ -28,6 +28,8 @@ class DatabaseHandler:
         )
 
     async def create_database(self) -> None:
+        """Create the database and all the tables."""
+
         async with self._engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
             await conn.commit()

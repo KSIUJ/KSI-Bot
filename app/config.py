@@ -10,8 +10,20 @@ GUILD_IDS: frozenset[int] = frozenset((848921520776413213, 528544644678680576, 6
 LOGGING_LEVELS: frozenset[str] = frozenset(("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"))
 
 
+class MissingEnvironmentVariable(Exception):
+    pass
+
+
+class InvalidEnvironmentVariable(Exception):
+    pass
+
+
 def get_guilds() -> Iterable[discord.Object]:
-    """Returns list of discord.Object with guild ID"""
+    """Get discord guilds objects based on GUILD_IDS enviromental variable
+
+    Returns:
+        Iterable[discord.Object]: iterable of discord guild objects
+    """
 
     guilds = []
 
@@ -24,80 +36,139 @@ def get_guilds() -> Iterable[discord.Object]:
 def get_logging_level() -> str:
     """Get logging level from LOGGING_LEVEL enviromental variable
 
+    Raises:
+        InvalidEnvironmentVariable: Invalid logging level enviromental variable
+        MissingEnvironmentVariable: Missing logging level enviromental variable
+
     Returns:
-        str: logging level
+        str: a logging level string
     """
 
     logging_level = os.getenv("LOGGING_LEVEL")
 
     if logging_level not in LOGGING_LEVELS:
-        raise Exception(f"Invalid logging level, valid values {LOGGING_LEVELS}")
+        raise InvalidEnvironmentVariable(f"Invalid logging level, valid values {LOGGING_LEVELS}")
 
     if logging_level is None:
-        raise Exception("Enviromental variable LOGGING_LEVEL doesn't have value")
+        raise MissingEnvironmentVariable(
+            "Enviromental variable LOGGING_LEVEL doesn't have a value"
+        )
 
     return logging_level
 
 
 def get_command_prefix() -> str:
-    """Get command prefix from COMMAND_PREFIX enviromental variable"""
+    """Get command prefix from COMMAND_PREFIX enviromental variable
 
+    Raises:
+        MissingEnvironmentVariable: missing command prefix enviromental variable
+
+    Returns:
+        str: a command prefix string
+    """
     command_prefix = os.getenv("COMMAND_PREFIX")
 
     if command_prefix is None:
-        raise Exception("Enviromental variable COMMAND_PREFIX doesn't have value")
+        raise MissingEnvironmentVariable(
+            "Enviromental variable COMMAND_PREFIX doesn't have a value"
+        )
 
     return command_prefix
 
 
 def get_app_id() -> str:
-    """Get application ID from APP_ID enviromental variable"""
+    """Get current app id from APP_ID enviromental variable
+
+    Raises:
+        MissingEnvironmentVariable: missing app id enviromental variable
+
+    Returns:
+        str: a string with the app ID
+    """
 
     app_id = os.getenv("APP_ID")
 
     if app_id is None:
-        raise Exception("Enviromental variable APP_ID doesn't have value")
+        raise MissingEnvironmentVariable("Enviromental variable APP_ID doesn't have a value")
 
     return app_id
 
 
 def get_token() -> str:
-    """Get current token from DISCORD_TOKEN enviromental variable"""
+    """Get discord token from DISCORD_TOKEN enviromental variable
+
+    Raises:
+        MissingEnvironmentVariable: missing discord token enviromental variable
+
+    Returns:
+        str: a string with the discord token
+    """
 
     token = os.getenv("DISCORD_TOKEN")
 
     if token is None:
-        raise Exception("Enviromental variable DISCORD_TOKEN doesn't have value")
+        raise MissingEnvironmentVariable(
+            "Enviromental variable DISCORD_TOKEN doesn't have a value"
+        )
 
     return token
 
 
 def get_logging_path() -> str:
-    """Gets logging file path from LOGS_PATH enviromental variable"""
+    """Get logging path from LOGS_PATH enviromental variable
+
+    Raises:
+        MissingEnvironmentVariable: missing logging path enviromental variable
+
+    Returns:
+        str: a string with the path where the logs will be stored
+    """
 
     logging_path = os.getenv("LOGS_PATH")
 
     if logging_path is None:
-        raise Exception("Enviromental variable for logging path doesn't have value")
+        raise MissingEnvironmentVariable(
+            "Enviromental variable for logging path doesn't have a value"
+        )
 
     return logging_path
 
 
 def get_database_path() -> str:
-    """Gets database path enviromental variable"""
+    """Get database path from DATABASE_PATH enviromental variable
+
+    Raises:
+        MissingEnvironmentVariable: missing database path enviromental variable
+
+    Returns:
+        str: a string with the path where the database is present
+    """
 
     db_path = os.getenv("DATABASE_PATH")
 
     if db_path is None:
-        raise Exception("Enviromental variable for database path doesn't have value")
+        raise MissingEnvironmentVariable(
+            "Enviromental variable for database path doesn't have a value"
+        )
 
     return db_path
 
 
 def get_data_path() -> str:
+    """Get data path from DATA_PATH enviromental variable
+
+    Raises:
+        MissingEnvironmentVariable: missing data path enviromental variable
+
+    Returns:
+        str: a string with the path where the data folder is located in
+    """
+
     data_path = os.getenv("DATA_PATH")
 
     if data_path is None:
-        raise Exception("Enviromental variable for data folder path doesn't have value")
+        raise MissingEnvironmentVariable(
+            "Enviromental variable for data folder path doesn't have a value"
+        )
 
     return data_path

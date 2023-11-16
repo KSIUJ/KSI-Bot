@@ -13,10 +13,28 @@ class BaseMessageResponder:
         self._next_responder: BaseMessageResponder | None = None
 
     async def set_next_responder(self, responder: BaseMessageResponder) -> BaseMessageResponder:
+        """Set the next responder in the chain.
+        The next responder will be called if the current responder doesn't handle the message.
+
+        Args:
+            responder (BaseMessageResponder): The next responder in the chain.
+
+        Returns:
+            BaseMessageResponder: The next responder in the chain passed as an argument.
+        """
+
         self._next_responder = responder
         return responder
 
     async def get_response(self, message: discord.Message) -> None:
+        """Default implementation of the get_response method.
+
+        Calls the next responder in the chain if it exists.
+
+        Args:
+            message (discord.Message): a discord message object
+        """
+
         if self._next_responder:
             await self._next_responder.get_response(message)
 
@@ -46,7 +64,7 @@ RESPONDERS: Sequence[BaseMessageResponder] = (
 
 
 async def handle_responses(message: discord.Message) -> None:
-    """Handle responses to messages.
+    """Handle responses to messages by calling the responders chain.
 
     Args:
         message (discord.Message): The message to handle.
