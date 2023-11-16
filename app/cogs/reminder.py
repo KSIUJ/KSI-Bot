@@ -1,13 +1,16 @@
 import discord
+from sqlalchemy import delete
 import app.bot
 import datetime
 import logging
 
+from sqlalchemy.future import select
 from discord.ext import commands
 from discord import app_commands
 
 from apscheduler.triggers.cron import CronTrigger
 from typing import Literal
+from app.database.models.reminder import Reminders
 
 from app.utils.guilds import get_guilds
 
@@ -46,25 +49,34 @@ class Reminder(commands.Cog):
         await interaction.response.defer(ephemeral=True, thinking=True)
 
         remind_date = self.get_remind_date(value, unit).replace(second=0, microsecond=0)
-        await self.bot.database_handler.execute_and_commit(
-            "INSERT INTO Reminders (UserID, RemindDate, ChannelID, Message) VALUES (?, ?, ?, ?)",
-            interaction.user.id,
-            str(remind_date),
-            str(interaction.channel_id),
-            message,
+        reminder = Reminders(
+            UserID=str(interaction.user.id),
+            RemindDate=str(remind_date),
+            ChannelID=str(interaction.channel_id),
+            Message=message,
         )
 
-        await interaction.followup.send(f"reminder set for {value} {unit}")
+        async with self.bot.session() as session:
+            session.add(reminder)
+            await session.commit()
+
+        await interaction.followup.send(f"Reminder set for {value} {unit}")
 
     async def check_reminders(self) -> None:
         now = datetime.datetime.now().replace(second=0, microsecond=0)
 
-        records = await self.bot.database_handler.records(
-            "SELECT ROWID, UserID, RemindDate, ChannelID, Message FROM Reminders WHERE RemindDate < ?",
-            str(now),
-        )
-        logger.debug(repr(records))
-        for _, userID, _, channelID, message in records:
+        async with self.bot.session() as session:
+            query_results = (
+                await session.execute(select(Reminders).where(Reminders.RemindDate <= str(now)))
+            ).fetchall()
+
+        logger.debug(repr(query_results))
+        for result in query_results:
+            reminder_obj = result[0]  # Access the first (and only) element in result
+            userID = reminder_obj.UserID
+            channelID = reminder_obj.ChannelID
+            message = reminder_obj.Message
+
             logger.debug(
                 f"Respond with remainder arguments: userid={userID}, channelid={channelID}, msg={message}"
             )
@@ -72,12 +84,13 @@ class Reminder(commands.Cog):
                 userID=int(userID), channelID=int(channelID), message=message
             )
 
-        row_ids = [str(record[0]) for record in records]
-        logger.debug(f"row_ids to delete {','.join(row_ids)}")
-
-        await self.bot.database_handler.execute_and_commit(
-            "DELETE FROM Reminders WHERE ROWID IN (?)", ",".join(row_ids)
-        )
+        async with self.bot.session() as session:
+            await session.execute(
+                delete(Reminders).where(
+                    Reminders.ReminderID.in_([x[0].ReminderID for x in query_results])
+                )
+            )
+            await session.commit()
 
     async def respond_with_reminder(self, userID: int, channelID: int, message: str) -> None:
         target_user = self.bot.get_user(userID)
