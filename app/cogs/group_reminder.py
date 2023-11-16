@@ -1,6 +1,5 @@
 import datetime
 import logging
-from typing import Literal
 
 import discord
 from apscheduler.triggers.cron import CronTrigger
@@ -11,7 +10,6 @@ from sqlalchemy.future import select
 
 import app.bot
 from app.cogs.utils.message_utils import join_texts
-from app.cogs.utils.reminders_utils import get_remind_date
 from app.config import get_guilds
 from app.database.models.group_reminders import GroupReminders
 
@@ -44,7 +42,7 @@ class GroupReminder(commands.Cog):
         message: discord.Message = await channel.send(
             join_texts(
                 f"Reminder created by <@{author_id}> with message:",
-                f"> {reminder_text}",
+                f"```{reminder_text}```",
                 f"You will be reminded on {remind_date} UTC.",
                 "React to this message if you want to get the reminder as well!",
                 separator="\n",
@@ -63,33 +61,37 @@ class GroupReminder(commands.Cog):
     async def _group_remindme(
         self,
         interaction: discord.Interaction,
-        value: app_commands.Range[int, 1, 366 * 3],
-        unit: Literal["minutes", "hours", "days"],
+        target_date: str,
         reminder_text: str,
     ) -> None:
         """Function which handles the /remindme command.
 
         Args:
             interaction (discord.Interaction): The interaction that triggered the command.
-            value (app_commands.Range[int, 1, 366 * 3]): The value of the reminder.
-            unit (Literal["minutes", "hours", "days"]): The unit of the reminder.
+            target_date (str): The date in YYYY-mm-DD HH:MM format, assuming UTC.
             reminder_text (str): The message to send with the reminder.
             send_direct_message (bool, optional): Whether or not to send a direct message to the user. Defaults to False.
         """
 
         await interaction.response.defer(ephemeral=True, thinking=True)
+        try:
+            reminder_dt: datetime.datetime = datetime.datetime.strptime(
+                target_date, "%Y-%m-%d %H:%M"
+            )
+        except ValueError:
+            await interaction.followup.send("Invalid date format. Please use YYYY-mm-DD HH:MM")
+            return
 
-        remind_date = get_remind_date(value, unit).replace(second=0, microsecond=0)
         signup_message = await self.send_signup_message(
             interaction.channel,  # type: ignore
             reminder_text=reminder_text,
             author_id=interaction.user.id,
-            remind_date=remind_date.strftime("%Y-%m-%d %H:%M"),
+            remind_date=reminder_dt.strftime("%Y-%m-%d %H:%M"),
         )
 
         reminder = GroupReminders(
             AuthorID=interaction.user.id,
-            RemindDate=remind_date.strftime("%Y-%m-%d %H:%M"),
+            RemindDate=reminder_dt.strftime("%Y-%m-%d %H:%M"),
             CreationDate=datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
             ChannelID=interaction.channel_id,
             Message=reminder_text,
@@ -100,7 +102,7 @@ class GroupReminder(commands.Cog):
             session.add(reminder)
             await session.commit()
 
-        await interaction.followup.send(f"Reminder set for {value} {unit}")
+        await interaction.followup.send(f"Reminder set for {reminder_dt}")
 
     async def check_group_reminders(self) -> None:
         """Check the database for reminders that need to be sent."""
@@ -172,14 +174,14 @@ class GroupReminder(commands.Cog):
             users_to_remind: set[int] = set()
             for reaction in message.reactions:
                 async for user in reaction.users():
-                    if user.bot:
+                    if user.bot or user.id == author_id:
                         continue
                     users_to_remind.add(user.id)
 
             await target_channel.send(  # type: ignore
                 join_texts(
                     f"Reminder created by <@{author_id}> on {creation_date} UTC with message:",
-                    f"> {reminder_text}",
+                    f"```{reminder_text}```",
                     f"||Users which reacted to the remind message: {', '.join([f'<@{user_id}>' for user_id in users_to_remind])}||",
                     separator="\n",
                 )

@@ -1,6 +1,5 @@
 import datetime
 import logging
-from typing import Literal
 
 import discord
 from apscheduler.triggers.cron import CronTrigger
@@ -11,7 +10,6 @@ from sqlalchemy.future import select
 
 import app.bot
 from app.cogs.utils.message_utils import join_texts
-from app.cogs.utils.reminders_utils import get_remind_date
 from app.config import get_guilds
 from app.database.models.reminders import Reminders
 
@@ -31,30 +29,35 @@ class Reminder(commands.Cog):
     async def _remindme(
         self,
         interaction: discord.Interaction,
-        value: app_commands.Range[int, 1, 366 * 3],
-        unit: Literal["minutes", "hours", "days"],
-        message: str,
+        target_date: str,
+        reminder_text: str,
         send_direct_message: bool = False,
     ) -> None:
         """Function which handles the /remindme command.
 
         Args:
             interaction (discord.Interaction): The interaction that triggered the command.
-            value (app_commands.Range[int, 1, 366 * 3]): The value of the reminder.
-            unit (Literal["minutes", "hours", "days"]): The unit of the reminder.
-            message (str): The message to send with the reminder.
+            target_date (str): The date in YYYY-mm-DD HH:MM format, assuming UTC.
+            reminder_text (str): The message to send with the reminder.
             send_direct_message (bool, optional): Whether or not to send a direct message to the user. Defaults to False.
         """
 
         await interaction.response.defer(ephemeral=True, thinking=True)
 
-        remind_date = get_remind_date(value, unit).replace(second=0, microsecond=0)
+        try:
+            reminder_dt: datetime.datetime = datetime.datetime.strptime(
+                target_date, "%Y-%m-%d %H:%M"
+            )
+        except ValueError:
+            await interaction.followup.send("Invalid date format. Please use YYYY-mm-DD HH:MM")
+            return
+
         reminder = Reminders(
             AuthorID=interaction.user.id,
-            RemindDate=remind_date.strftime("%Y-%m-%d %H:%M"),
+            RemindDate=reminder_dt.strftime("%Y-%m-%d %H:%M"),
             CreationDate=datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
             ChannelID=interaction.channel_id,
-            Message=message,
+            Message=reminder_text,
             SendDirectMessage=send_direct_message,
         )
 
@@ -62,7 +65,7 @@ class Reminder(commands.Cog):
             session.add(reminder)
             await session.commit()
 
-        await interaction.followup.send(f"Reminder set for {value} {unit}")
+        await interaction.followup.send(f"Reminder set for {reminder_dt}")
 
     async def check_reminders(self) -> None:
         """Check the database for reminders that need to be sent."""
@@ -128,7 +131,7 @@ class Reminder(commands.Cog):
             await target_user.send(
                 join_texts(
                     f"Direct reminder created by <@{author_id}> on {creation_date} UTC with message:",
-                    f"> {reminder_text}",
+                    f"```{reminder_text}```",
                 )
             )
 
@@ -136,7 +139,7 @@ class Reminder(commands.Cog):
             await target_channel.send(  # type: ignore
                 join_texts(
                     f"Direct reminder created by <@{author_id}> on {creation_date} UTC with message:",
-                    f"> {reminder_text}",
+                    f"```{reminder_text}```",
                 )
             )
 
