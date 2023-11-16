@@ -1,9 +1,10 @@
-import pathlib
 import datetime
-import discord
 import logging
+import pathlib
 
-from app.config import get_logging_path, get_data_path
+import discord
+
+from app.config import get_data_path, get_logging_path
 
 
 async def create_logs_directory(path: str) -> None:
@@ -16,7 +17,7 @@ async def create_logs_directory(path: str) -> None:
 
 async def setup_logging(level: str) -> None:
     """Creates logs directory and setups logging inside discord library
-    
+
     Args:
         level (str): logging level
     """
@@ -26,9 +27,9 @@ async def setup_logging(level: str) -> None:
         "INFO": logging.INFO,
         "WARNING": logging.WARNING,
         "ERROR": logging.ERROR,
-        "CRITICAL": logging.CRITICAL   
+        "CRITICAL": logging.CRITICAL,
     }
-    
+
     logging_level = level_mapping[level]
 
     await create_logs_directory(get_logging_path())

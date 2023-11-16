@@ -1,13 +1,14 @@
 import os
+from typing import Iterable
+
 import discord
 import dotenv
-
-from typing import Iterable
 
 dotenv.load_dotenv()
 
 GUILD_IDS: frozenset[int] = frozenset((848921520776413213, 528544644678680576, 612600222622810113))
 LOGGING_LEVELS: frozenset[str] = frozenset(("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"))
+
 
 def get_guilds() -> Iterable[discord.Object]:
     """Returns list of discord.Object with guild ID"""
@@ -22,14 +23,13 @@ def get_guilds() -> Iterable[discord.Object]:
 
 def get_logging_level() -> str:
     """Get logging level from LOGGING_LEVEL enviromental variable
-    
+
     Returns:
         str: logging level
     """
 
     logging_level = os.getenv("LOGGING_LEVEL")
-    
-    
+
     if logging_level not in LOGGING_LEVELS:
         raise Exception(f"Invalid logging level, valid values {LOGGING_LEVELS}")
 

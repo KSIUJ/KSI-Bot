@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import discord
 import logging
-
 from typing import Sequence
+
+import discord
 
 logger = logging.getLogger(__name__)
 
 
-class BaseMessageResponder():
+class BaseMessageResponder:
     def __init__(self) -> None:
         self._next_responder: BaseMessageResponder | None = None
 
@@ -39,12 +39,15 @@ class WhoAskedPolishResponder(BaseMessageResponder):
             await super().get_response(message)
 
 
-RESPONDERS: Sequence[BaseMessageResponder] = (PolishBotQuestionResponder(), WhoAskedPolishResponder())
+RESPONDERS: Sequence[BaseMessageResponder] = (
+    PolishBotQuestionResponder(),
+    WhoAskedPolishResponder(),
+)
 
 
 async def handle_responses(message: discord.Message) -> None:
     """Handle responses to messages.
-    
+
     Args:
         message (discord.Message): The message to handle.
     """

@@ -1,17 +1,17 @@
-import discord
-from sqlalchemy import delete
-import app.bot
 import datetime
 import logging
-
-from sqlalchemy.future import select
-from discord.ext import commands
-from discord import app_commands
-
-from apscheduler.triggers.cron import CronTrigger
 from typing import Literal
-from app.database.models.reminder import Reminders
+
+import discord
+from apscheduler.triggers.cron import CronTrigger
+from discord import app_commands
+from discord.ext import commands
+from sqlalchemy import delete
+from sqlalchemy.future import select
+
+import app.bot
 from app.config import get_guilds
+from app.database.models.reminder import Reminders
 
 logger = logging.getLogger(__name__)
 
@@ -149,7 +149,9 @@ class Reminder(commands.Cog):
             )
 
         if target_channel:
-            await target_channel.send(f"Reminder created by <@{userID}> on {creation_date} with message: {message}")  # type: ignore
+            await target_channel.send(  # type: ignore
+                f"Reminder created by <@{userID}> on {creation_date} with message: {message}"
+            )
 
     @commands.Cog.listener("on_ready")
     async def set_scheduler(self) -> None:

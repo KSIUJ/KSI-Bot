@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-import discord
 import pathlib
-import app.config
 
-from discord.ext import commands
+import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from discord.ext import commands
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+import app.config
 from app.database.database_handler import DatabaseHandler, create_database_directory
 from app.logger import setup_logging
 from app.message_responses.responders import handle_responses
@@ -69,13 +70,13 @@ class Bot(commands.Bot):
         await handle_responses(message=message)
         await super().on_message(message)
 
-    async def close(self):
+    async def close(self) -> None:
         """Called when the bot is shutting down."""
 
         await super().close()
 
     @property
-    def session(self):
+    def session(self) -> async_sessionmaker[AsyncSession]:
         """Async session for the database."""
 
         return self.database_handler.session

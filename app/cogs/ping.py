@@ -1,12 +1,12 @@
-import discord
-import app.bot
 import logging
+
 import aiohttp
-
-from discord.ext import commands
+import discord
 from discord import app_commands
-from app.config import get_guilds
+from discord.ext import commands
 
+import app.bot
+from app.config import get_guilds
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class Pinger(commands.Cog):
         name="ping",
         description="ping a website and check if it does work for the bot",
     )
-    @app_commands.checks.cooldown(1, 10)
+    @app_commands.checks.cooldown(1, 30)
     @app_commands.guilds(*get_guilds())
     async def _ping(self, interaction: discord.Interaction, url: str) -> None:
         """Handles the /ping command.

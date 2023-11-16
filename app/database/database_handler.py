@@ -1,18 +1,18 @@
-import pathlib
 import logging
-
+import pathlib
 
 from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    create_async_engine,
-    async_sessionmaker,
     AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
 )
 
-from app.database.models.reminder import (
-    Reminders,
-)  # import needed for sqlalchemy to create the table
+# imports needed for sqlalchemy to create the tables
 from app.database.models.base import Base
+from app.database.models.reminder import (
+    Reminders,  # noqa: F401
+)
 
 logger = logging.getLogger(__name__)
 
