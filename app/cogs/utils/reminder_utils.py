@@ -1,7 +1,5 @@
 import datetime
 
-import discord
-
 
 class InvalidReminderDate(Exception):
     pass

@@ -10,7 +10,7 @@ from sqlalchemy.future import select
 
 import app.bot
 from app.cogs.utils.message_utils import join_texts
-from app.cogs.utils.reminder_utils import InvalidReminderDate, get_date, validate_text
+from app.cogs.utils.reminder_utils import get_date, validate_text
 from app.config import get_guilds
 from app.database.models.reminders import Reminders
 
