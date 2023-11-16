@@ -10,6 +10,7 @@ from sqlalchemy.future import select
 
 import app.bot
 from app.cogs.utils.message_utils import join_texts
+from app.cogs.utils.reminder_utils import InvalidReminderDate, get_date, validate_text
 from app.config import get_guilds
 from app.database.models.group_reminders import GroupReminders
 
@@ -74,13 +75,8 @@ class GroupReminder(commands.Cog):
         """
 
         await interaction.response.defer(ephemeral=True, thinking=True)
-        try:
-            reminder_dt: datetime.datetime = datetime.datetime.strptime(
-                target_date, "%Y-%m-%d %H:%M"
-            )
-        except ValueError:
-            await interaction.followup.send("Invalid date format. Please use YYYY-mm-DD HH:MM")
-            return
+        validate_text(reminder_text)
+        reminder_dt: datetime.datetime = get_date(target_date)
 
         signup_message = await self.send_signup_message(
             interaction.channel,  # type: ignore
@@ -206,8 +202,13 @@ class GroupReminder(commands.Cog):
 
         logger.error(type(error), error)
 
-        if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
-            await interaction.response.send_message(str(error), ephemeral=True)
+        match error:
+            case discord.app_commands.errors.CommandOnCooldown():
+                await interaction.followup.send(str(error), ephemeral=True)
+            case discord.app_commands.errors.CommandInvokeError():
+                await interaction.followup.send(str(error.original), ephemeral=True)
+            case _:
+                await interaction.followup.send(str(error), ephemeral=True)
 
 
 async def setup(bot: app.bot.Bot) -> None:
