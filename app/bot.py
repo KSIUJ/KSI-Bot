@@ -10,7 +10,6 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from app.database.database_handler import DatabaseHandler, create_database_directory
 from app.logger import setup_logging
 from app.message_responses.responders import handle_responses
-from app.utils.guilds import get_guilds
 
 
 class Bot(commands.Bot):
@@ -46,7 +45,7 @@ class Bot(commands.Bot):
     async def sync_guilds(self) -> None:
         """Sync the guilds the bot is in with the database."""
 
-        for guild in get_guilds():
+        for guild in app.config.get_guilds():
             await self.tree.sync(guild=guild)
 
     async def setup_hook(self) -> None:

@@ -1,7 +1,23 @@
 import os
+import discord
 import dotenv
 
+from typing import Iterable
+
 dotenv.load_dotenv()
+
+GUILD_IDS: frozenset[int] = frozenset((848921520776413213, 528544644678680576, 612600222622810113))
+
+
+def get_guilds() -> Iterable[discord.Object]:
+    """Returns list of discord.Object with guild ID"""
+
+    guilds = []
+
+    for guild_ID in GUILD_IDS:
+        guilds.append(discord.Object(id=guild_ID))
+
+    return guilds
 
 
 def get_command_prefix() -> str:

@@ -5,8 +5,8 @@ import aiohttp
 
 from discord.ext import commands
 from discord import app_commands
+from app.config import get_guilds
 
-from app.utils.guilds import get_guilds
 
 logger = logging.getLogger(__name__)
 

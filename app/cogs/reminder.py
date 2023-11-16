@@ -11,8 +11,7 @@ from discord import app_commands
 from apscheduler.triggers.cron import CronTrigger
 from typing import Literal
 from app.database.models.reminder import Reminders
-
-from app.utils.guilds import get_guilds
+from app.config import get_guilds
 
 logger = logging.getLogger(__name__)
 
