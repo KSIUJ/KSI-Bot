@@ -75,7 +75,7 @@ class GroupReminder(commands.Cog):
         """
 
         await interaction.response.defer(ephemeral=True, thinking=True)
-        validate_text(reminder_text)
+        await validate_text(reminder_text)
         reminder_dt: datetime.datetime = get_date(target_date)
 
         signup_message = await self.send_signup_message(
@@ -201,10 +201,9 @@ class GroupReminder(commands.Cog):
         """
 
         logger.error(type(error), error)
-
         match error:
             case discord.app_commands.errors.CommandOnCooldown():
-                await interaction.followup.send(str(error), ephemeral=True)
+                await interaction.response.send_message(str(error))
             case discord.app_commands.errors.CommandInvokeError():
                 await interaction.followup.send(str(error.original), ephemeral=True)
             case _:

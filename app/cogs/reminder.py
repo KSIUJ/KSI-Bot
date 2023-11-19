@@ -42,9 +42,8 @@ class Reminder(commands.Cog):
             reminder_text (str): The message to send with the reminder.
             send_direct_message (bool, optional): Whether or not to send a direct message to the user. Defaults to False.
         """
-
         await interaction.response.defer(ephemeral=True, thinking=True)
-        validate_text(reminder_text)
+        await validate_text(reminder_text)
         reminder_dt: datetime.datetime = get_date(target_date)
 
         reminder = Reminders(
@@ -156,12 +155,13 @@ class Reminder(commands.Cog):
         """
 
         logger.error(type(error), error)
-
         match error:
             case discord.app_commands.errors.CommandOnCooldown():
-                await interaction.followup.send(str(error), ephemeral=True)
+                await interaction.response.send_message(str(error))
             case discord.app_commands.errors.CommandInvokeError():
                 await interaction.followup.send(str(error.original), ephemeral=True)
+            case _:
+                await interaction.followup.send(str(error), ephemeral=True)
 
 
 async def setup(bot: app.bot.Bot) -> None:

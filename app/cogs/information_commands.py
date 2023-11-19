@@ -83,16 +83,13 @@ class InformationCommands(commands.Cog):
         """
 
         logger.error(type(error), error)
-
-        if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
-            await interaction.response.send_message(str(error))
-
-        if isinstance(
-            error,
-            discord.app_commands.errors.CommandInvokeError,
-        ):
-            logger.error(str(error))
-            await interaction.followup.send(str(error.original), ephemeral=True)
+        match error:
+            case discord.app_commands.errors.CommandOnCooldown():
+                await interaction.response.send_message(str(error))
+            case discord.app_commands.errors.CommandInvokeError():
+                await interaction.followup.send(str(error.original), ephemeral=True)
+            case _:
+                await interaction.followup.send(str(error), ephemeral=True)
 
 
 async def setup(bot: app.bot.Bot) -> None:

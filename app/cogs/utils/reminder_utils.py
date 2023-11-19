@@ -1,11 +1,14 @@
 import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class InvalidReminderDate(Exception):
     pass
 
 
-def validate_text(text: str) -> None:
+async def validate_text(text: str) -> None:
     """Validate the reminder text.
 
     Args:
@@ -27,6 +30,6 @@ def get_date(target_date: str) -> datetime.datetime:
     try:
         reminder_dt: datetime.datetime = datetime.datetime.strptime(target_date, "%Y-%m-%d %H:%M")
     except ValueError:
-        raise InvalidReminderDate("Invalid date format. Please use YYYY-mm-DD HH:MM")
+        raise ValueError("Invalid date format. Please use YYYY-mm-DD HH:MM")
 
     return reminder_dt
